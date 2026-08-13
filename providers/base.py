@@ -12,3 +12,12 @@ class BaseProvider(ABC):
     @abstractmethod
     def chat(self, messages: list[dict[str, str]], model: str | None = None, **kwargs: Any) -> str:
         raise NotImplementedError
+
+    def health_check(self) -> dict[str, Any]:
+        return {"status": "available", "balance": "unknown", "quota": "unknown"}
+
+    def get_balance(self) -> str:
+        return "unknown"
+
+    def get_quota(self) -> str:
+        return "unknown"
