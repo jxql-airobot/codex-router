@@ -112,6 +112,17 @@ Reviewer：
 - 结果合并 `merge_outputs`
 - 文件冲突检测 `detect_file_conflicts`
 
+## Multi Project Management（v1.9）
+
+`project_manager.py` 维护多项目注册表，支持识别项目、加载 Memory 与 RAG、
+保存历史：
+
+```powershell
+python project_manager.py register C:\path\to\project
+python project_manager.py list
+python project_manager.py load C:\path\to\project
+```
+
 ## 文件结构
 
 ```text
@@ -157,6 +168,9 @@ codex-router/
 │   └── indexer.py
 ├── rag/
 │   └── engine.py
+├── project_manager/
+│   └── manager.py
+├── project_manager.py
 ├── git_lifecycle.py
 ├── rag_query.py
 ├── launcher/

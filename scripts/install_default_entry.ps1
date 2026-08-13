@@ -34,6 +34,7 @@ $RuntimeFiles = @(
     'git_lifecycle.py',
     'rag_query.py',
     'agent_registry.py',
+    'project_manager.py',
     'requirements.txt'
 )
 foreach ($File in $RuntimeFiles) {
@@ -68,7 +69,7 @@ if (Test-Path -LiteralPath $MemoryDest) {
 }
 Copy-Item -LiteralPath (Join-Path $Source 'memory') -Destination $MemoryDest -Recurse
 
-foreach ($Dir in @('git_manager', 'task_manager', 'report', 'vector_store', 'knowledge', 'rag')) {
+foreach ($Dir in @('git_manager', 'task_manager', 'report', 'vector_store', 'knowledge', 'rag', 'project_manager')) {
     $ExtraDest = Join-Path $InstallDir $Dir
     if (-not $ExtraDest.StartsWith($InstallDir, [System.StringComparison]::OrdinalIgnoreCase)) {
         throw "Refusing to delete unexpected path: $ExtraDest"
