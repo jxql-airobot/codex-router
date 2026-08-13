@@ -90,6 +90,19 @@ agents/local_agent/             Ollama / LM Studio
 python agent_registry.py
 ```
 
+## Dynamic Agent Planner（v1.7）
+
+Agent 模式会根据任务领域自动生成团队，而不是固定 Planner/Coder/Tester/
+Reviewer：
+
+- 软件开发 → Requirement / Architecture / Backend / Frontend / Testing / Reviewer
+- 数据分析 → Research / Data / Python / Visualization / Reviewer
+- 论文 → Research / Experiment / Writer / Reviewer
+- ROS2 → Planner / Coder / Tester / Reviewer
+
+由 `launcher/dynamic_planner.py` 负责领域识别与团队规划，`config.yaml` 的
+`agents.dynamic: true` 开启。
+
 ## 文件结构
 
 ```text
@@ -141,7 +154,8 @@ codex-router/
 │   ├── codex_auto.py
 │   ├── model_runner.py
 │   ├── execution_mode.py
-│   └── agent_runner.py
+│   ├── agent_runner.py
+│   └── dynamic_planner.py
 ├── scripts/
 │   ├── install_default_entry.ps1
 │   └── uninstall_default_entry.ps1

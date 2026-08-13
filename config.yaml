@@ -32,6 +32,7 @@ execution:
 
 agents:
   enabled: true
+  dynamic: true
 
 agent_roles:
   planner:

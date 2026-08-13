@@ -18,6 +18,7 @@ from model_selector import select
 from memory.context_builder import build_context
 
 from launcher.agent_runner import run_agent_pipeline
+from launcher.dynamic_planner import plan_roles
 from launcher.execution_mode import (
     determine_execution_mode,
     load_roles,
@@ -290,8 +291,8 @@ def format_direct_log(task: str, classification, selection, mode: str) -> str:
     return "\n".join(lines)
 
 
-def format_agent_log(task: str, classification, config) -> str:
-    roles = load_roles(config)
+def format_agent_log(task: str, classification, config, roles=None) -> str:
+    roles = roles if roles is not None else load_roles(config)
     lines = [
         "=====================",
         "Codex Router",
@@ -401,7 +402,8 @@ def main(argv: list[str] | None = None) -> int:
         print()
 
     if execution == "agent":
-        roles = load_roles(config)
+        dynamic_enabled = bool(config.get("agents", {}).get("dynamic", False))
+        roles = plan_roles(task, config) if dynamic_enabled else load_roles(config)
         if args.router_json:
             print(
                 json.dumps(
@@ -424,7 +426,7 @@ def main(argv: list[str] | None = None) -> int:
                 )
             )
         else:
-            print(format_agent_log(task, classification, config))
+            print(format_agent_log(task, classification, config, roles))
 
         agents_enabled = bool(config.get("agents", {}).get("enabled", True))
         if args.dry_run or not agents_enabled:
@@ -435,6 +437,7 @@ def main(argv: list[str] | None = None) -> int:
                 config,
                 dry_run=True,
                 project_context=project_context.to_markdown(),
+                roles=roles,
             )
             _maybe_git_report(args, exit_code, context_start)
             return exit_code
@@ -443,6 +446,7 @@ def main(argv: list[str] | None = None) -> int:
             config,
             dry_run=False,
             project_context=project_context.to_markdown(),
+            roles=roles,
         )
         _maybe_git_report(args, exit_code, context_start)
         return exit_code

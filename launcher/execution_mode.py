@@ -19,6 +19,7 @@ class AgentRole:
     name: str
     model_tier: str
     sandbox: str = "read-only"
+    instructions: str = ""
 
 
 ROLE_ORDER = ("planner", "coder", "tester", "reviewer")

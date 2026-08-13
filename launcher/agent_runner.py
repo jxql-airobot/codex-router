@@ -45,9 +45,12 @@ def _build_prompt(
     parts: list[str] = []
     if project_context.strip():
         parts.append(project_context.strip())
-    role_doc = _read_role_doc(role.name)
-    if role_doc.strip():
-        parts.append(role_doc.strip())
+    if role.instructions.strip():
+        parts.append(role.instructions.strip())
+    else:
+        role_doc = _read_role_doc(role.name)
+        if role_doc.strip():
+            parts.append(role_doc.strip())
     parts.append(f"# 当前任务\n{task}")
     if context:
         parts.append(f"# 前序 Agent 输出\n{context}")
@@ -58,12 +61,13 @@ def build_agent_steps(
     task: str,
     config: dict[str, Any],
     project_context: str = "",
+    roles: list[AgentRole] | None = None,
 ) -> list[AgentStep]:
     """Build the Planner -> Coder -> Tester -> Reviewer pipeline."""
     steps: list[AgentStep] = []
     context = ""
 
-    for role in load_roles(config):
+    for role in (roles if roles is not None else load_roles(config)):
         prompt = _build_prompt(role, task, context, project_context)
         codex_args = []
         if role.sandbox:
@@ -105,11 +109,12 @@ def run_agent_pipeline(
     config: dict[str, Any],
     dry_run: bool = False,
     project_context: str = "",
+    roles: list[AgentRole] | None = None,
 ) -> int:
     context = ""
     last_code = 0
 
-    for role in load_roles(config):
+    for role in (roles if roles is not None else load_roles(config)):
         prompt = _build_prompt(role, task, context, project_context)
         codex_args = ["--sandbox", role.sandbox] if role.sandbox else []
         step = AgentStep(role=role, prompt=prompt, codex_args=codex_args)
