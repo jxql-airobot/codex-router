@@ -1,0 +1,54 @@
+auto_router: true
+default_model: flash
+
+models:
+  flash:
+    provider: deepseek
+    model_name: deepseek-v4-flash
+    model: deepseek-v4-flash
+    profile: null
+    env:
+      MODEL_PROVIDER: deepseek
+      MODEL_NAME: deepseek-v4-flash
+  pro:
+    provider: deepseek
+    model_name: deepseek-v4-pro
+    model: deepseek-v4-pro
+    profile: null
+    env:
+      MODEL_PROVIDER: deepseek
+      MODEL_NAME: deepseek-v4-pro
+
+threshold:
+  pro_score: 70
+  flash_max: 70
+  pro_token_warning: 8000
+  diff_lines_flash: 100
+  diff_lines_pro: 500
+
+execution:
+  direct_threshold: 40
+  enhanced_threshold: 70
+
+agents:
+  enabled: true
+
+agent_roles:
+  planner:
+    model: pro
+    sandbox: read-only
+  coder:
+    model: flash
+    sandbox: workspace-write
+  tester:
+    model: flash
+    sandbox: workspace-write
+  reviewer:
+    model: pro
+    sandbox: read-only
+
+launcher:
+  codex_bin: codex-real
+  mode: exec
+  model_switch: cli
+  pass_provider: false
