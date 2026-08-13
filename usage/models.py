@@ -24,3 +24,5 @@ class UsageRecord:
     files_changed: int = 0
     tests_added: int = 0
     success: bool = False
+    task_type: str = ""
+    workflow: str = ""

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from analytics.efficiency import efficiency
+from analytics.classification import classification_stats
 from analytics.heatmap import daily_activity
 from analytics.statistics import breakdowns, overview, token_history
 from usage.tracker import UsageTracker
@@ -32,6 +33,10 @@ def agents_data() -> list[dict[str, Any]]:
 
 def efficiency_data() -> dict[str, Any]:
     return efficiency()
+
+
+def classification_data() -> list[dict[str, Any]]:
+    return classification_stats()
 
 
 def create_app():
@@ -65,5 +70,9 @@ def create_app():
     @app.get("/api/efficiency")
     def _efficiency():
         return efficiency_data()
+
+    @app.get("/api/classification")
+    def _classification():
+        return classification_data()
 
     return app

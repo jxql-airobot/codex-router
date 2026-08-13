@@ -38,7 +38,9 @@ class UsageDatabase:
                 commit_id TEXT,
                 files_changed INTEGER DEFAULT 0,
                 tests_added INTEGER DEFAULT 0,
-                success INTEGER DEFAULT 0
+                success INTEGER DEFAULT 0,
+                task_type TEXT,
+                workflow TEXT
             )
             """
         )
@@ -55,6 +57,8 @@ class UsageDatabase:
             "files_changed": "INTEGER DEFAULT 0",
             "tests_added": "INTEGER DEFAULT 0",
             "success": "INTEGER DEFAULT 0",
+            "task_type": "TEXT",
+            "workflow": "TEXT",
         }
         for column, definition in migrations.items():
             if column not in existing:
@@ -69,8 +73,9 @@ class UsageDatabase:
             INSERT INTO usage_records
             (timestamp, project, agent, provider, model, input_tokens,
              output_tokens, cached_tokens, total_tokens, cost, task_id, task,
-             commit_id, files_changed, tests_added, success)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             commit_id, files_changed, tests_added, success,
+             task_type, workflow)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 record.timestamp,
@@ -89,6 +94,8 @@ class UsageDatabase:
                 record.files_changed,
                 record.tests_added,
                 int(record.success),
+                record.task_type,
+                record.workflow,
             ),
         )
         self._conn.commit()
@@ -127,7 +134,7 @@ class UsageDatabase:
         rows = self._conn.execute(
             """
             SELECT timestamp, project, agent, provider, model, total_tokens, cost,
-                   commit_id, files_changed, tests_added, success
+                   commit_id, files_changed, tests_added, success, task_type, workflow
             FROM usage_records ORDER BY timestamp DESC LIMIT ?
             """,
             (limit,),

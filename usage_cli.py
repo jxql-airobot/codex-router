@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 
 from usage.tracker import UsageTracker
 from analytics.statistics import breakdowns, chinese_number
+from analytics.classification import classification_stats
 
 
 def _fmt(value: float) -> str:
@@ -71,6 +72,9 @@ def render_cn(detail: bool = False) -> str:
         lines.append("Agent贡献:")
         for row in data["agents"]:
             lines.append(f"{row['name']}: {chinese_number(row['tokens'])}")
+        lines.append("任务分类:")
+        for row in classification_stats(tracker):
+            lines.append(f"{row['type']}: {row['count']} 次 ({row['ratio']:.0%})")
     tracker.close()
     return "\n".join(lines)
 

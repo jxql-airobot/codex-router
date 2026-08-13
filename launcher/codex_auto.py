@@ -368,6 +368,29 @@ def _maybe_git_report(args: LauncherArgs, exit_code: int, repo: str | None) -> N
     print(f"Suggested commit: {message}")
 
 
+def _auto_record_usage(auto_plan: dict, project: str, classification, exit_code: int) -> None:
+    from usage.models import UsageRecord
+    from usage.tracker import UsageTracker
+
+    tracker = UsageTracker()
+    tracker.track(
+        UsageRecord(
+            project=project,
+            agent=", ".join(auto_plan.get("recommended_agents", [])),
+            provider="auto",
+            model="",
+            input_tokens=classification.estimated_tokens,
+            output_tokens=0,
+            total_tokens=classification.estimated_tokens,
+            task_id=auto_plan.get("session_id", ""),
+            task_type=auto_plan.get("type", ""),
+            workflow=auto_plan.get("recommended_workflow", ""),
+            success=exit_code == 0,
+        )
+    )
+    tracker.close()
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     config = load_config(CONFIG_PATH)
@@ -560,6 +583,7 @@ def main(argv: list[str] | None = None) -> int:
                 "success" if exit_code == 0 else "failed",
                 tokens=classification.estimated_tokens,
             )
+            _auto_record_usage(auto_plan, project_context.project_name, classification, exit_code)
             _maybe_git_report(args, exit_code, context_start)
             return exit_code
         exit_code = run_agent_pipeline(
@@ -574,6 +598,7 @@ def main(argv: list[str] | None = None) -> int:
             "success" if exit_code == 0 else "failed",
             tokens=classification.estimated_tokens,
         )
+        _auto_record_usage(auto_plan, project_context.project_name, classification, exit_code)
         _maybe_git_report(args, exit_code, context_start)
         return exit_code
 
@@ -632,6 +657,7 @@ def main(argv: list[str] | None = None) -> int:
         "success" if exit_code == 0 else "failed",
         tokens=classification.estimated_tokens,
     )
+    _auto_record_usage(auto_plan, project_context.project_name, classification, exit_code)
     _maybe_git_report(args, exit_code, context_start)
     return exit_code
 
