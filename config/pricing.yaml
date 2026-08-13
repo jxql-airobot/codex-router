@@ -1,0 +1,29 @@
+models:
+  deepseek-v4:
+    input_price_per_1m: 0.5
+    output_price_per_1m: 2.0
+    cache_price_per_1m: 0.1
+  deepseek-v4-flash:
+    input_price_per_1m: 0.1
+    output_price_per_1m: 0.4
+    cache_price_per_1m: 0.02
+  deepseek-v4-pro:
+    input_price_per_1m: 0.5
+    output_price_per_1m: 2.0
+    cache_price_per_1m: 0.1
+  gpt:
+    input_price_per_1m: 2.5
+    output_price_per_1m: 10.0
+    cache_price_per_1m: 0.5
+  claude:
+    input_price_per_1m: 3.0
+    output_price_per_1m: 15.0
+    cache_price_per_1m: 0.5
+  gemini:
+    input_price_per_1m: 1.25
+    output_price_per_1m: 5.0
+    cache_price_per_1m: 0.25
+  local:
+    input_price_per_1m: 0.0
+    output_price_per_1m: 0.0
+    cache_price_per_1m: 0.0
