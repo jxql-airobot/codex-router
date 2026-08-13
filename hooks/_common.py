@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
@@ -18,6 +20,23 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 DEFAULT_MODEL = "deepseek"
+
+
+def _force_utf8_io() -> None:
+    """Force UTF-8 on std streams so Chinese payload/output never mojibakes.
+
+    Codex pipes the hook payload and reads hook stdout as UTF-8. On Windows the
+    Python default is often the locale code page (GBK), which corrupts Chinese
+    text in both directions. This is best-effort and never raises.
+    """
+    for stream in (sys.stdin, sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
+
+
+_force_utf8_io()
 
 
 def get_data_dir() -> Path:
@@ -100,6 +119,108 @@ def emit_additional_context(text: str, event_name: str = "UserPromptSubmit") -> 
         print(json.dumps(output, ensure_ascii=False))
     except Exception:
         print(text)
+
+
+def now_iso() -> str:
+    """Return a UTC ISO-8601 timestamp, never raises."""
+    try:
+        return datetime.now(timezone.utc).isoformat()
+    except Exception:
+        return ""
+
+
+def summarize(value: Any, limit: int = 200) -> str:
+    """Turn a payload value into a short, single-line text summary."""
+    try:
+        if value is None:
+            return ""
+        if isinstance(value, (dict, list)):
+            text = json.dumps(value, ensure_ascii=False)
+        else:
+            text = str(value)
+        text = " ".join(text.split())
+        if len(text) > limit:
+            return text[:limit] + "..."
+        return text
+    except Exception:
+        return ""
+
+
+def git_status(cwd: str, timeout: float = 2.0) -> str:
+    """Return a compact git working-tree summary, or "" when unavailable."""
+    if not cwd:
+        return ""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(cwd), "status", "--porcelain"],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=False,
+        )
+    except Exception:
+        return ""
+    if result.returncode != 0:
+        return ""
+    lines = [line for line in result.stdout.splitlines() if line.strip()]
+    if not lines:
+        return "clean"
+    counts = {"modified": 0, "added": 0, "deleted": 0, "renamed": 0, "untracked": 0}
+    for line in lines:
+        code = line[:2]
+        if code == "??":
+            counts["untracked"] += 1
+            continue
+        status = code.strip()
+        if "M" in status:
+            counts["modified"] += 1
+        if "A" in status:
+            counts["added"] += 1
+        if "D" in status:
+            counts["deleted"] += 1
+        if "R" in status:
+            counts["renamed"] += 1
+    parts = [f"{k}:{v}" for k, v in counts.items() if v]
+    return ",".join(parts) if parts else "clean"
+
+
+def token_usage(payload: dict[str, Any]) -> dict[str, int]:
+    """Extract token counts from a hook payload defensively."""
+    usage = payload.get("usage")
+    if not isinstance(usage, dict):
+        usage = {}
+
+    def _int(*keys: str) -> int:
+        for key in keys:
+            try:
+                value = int(usage.get(key, 0))
+            except Exception:
+                continue
+            if value > 0:
+                return value
+        return 0
+
+    input_tokens = _int("input_tokens", "prompt_tokens", "input")
+    output_tokens = _int("output_tokens", "completion_tokens", "output")
+    total_tokens = _int("total_tokens", "total")
+    if total_tokens == 0:
+        total_tokens = input_tokens + output_tokens
+    return {
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "total_tokens": total_tokens,
+    }
+
+
+def log_hook(message: str) -> None:
+    """Append one line to the hook log; never raises."""
+    try:
+        path = get_data_dir() / "hooks.log"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as handle:
+            handle.write(f"{now_iso()} {message}\n")
+    except Exception:
+        pass
 
 
 def record_error(

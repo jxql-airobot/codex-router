@@ -1,7 +1,8 @@
 """on_error hook: detect failed tool calls and record them.
 
-Mapped to the official ``PostToolUse`` event with a ``Bash`` matcher. Error
-detection is heuristic and the hook always fails open (exit 0).
+Standby helper. It is intentionally NOT bound to ``PostToolUse`` by default:
+normal tool completion is handled by ``after_task.py``. Error detection is
+heuristic and the hook always fails open (exit 0).
 """
 
 from __future__ import annotations

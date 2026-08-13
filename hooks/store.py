@@ -66,6 +66,36 @@ class HookStore:
                     reason TEXT,
                     payload TEXT
                 );
+                CREATE TABLE IF NOT EXISTS tool_events (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp TEXT NOT NULL,
+                    session_id TEXT,
+                    cwd TEXT,
+                    project TEXT,
+                    tool_name TEXT,
+                    task TEXT,
+                    result_summary TEXT,
+                    model TEXT,
+                    provider TEXT,
+                    input_tokens INTEGER DEFAULT 0,
+                    output_tokens INTEGER DEFAULT 0,
+                    total_tokens INTEGER DEFAULT 0,
+                    git_status TEXT,
+                    duration_ms INTEGER DEFAULT 0,
+                    success INTEGER DEFAULT 1
+                );
+                CREATE TABLE IF NOT EXISTS session_summaries (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp TEXT NOT NULL,
+                    session_id TEXT,
+                    cwd TEXT,
+                    project TEXT,
+                    model TEXT,
+                    summary TEXT,
+                    error_count INTEGER DEFAULT 0,
+                    tool_count INTEGER DEFAULT 0,
+                    recent_tasks TEXT
+                );
                 """
             )
             conn.commit()
@@ -169,6 +199,135 @@ class HookStore:
             conn.commit()
         finally:
             conn.close()
+
+    def record_tool_event(
+        self,
+        session_id: str,
+        cwd: str,
+        project: str,
+        tool_name: str,
+        task: str = "",
+        result_summary: str = "",
+        model: str = "",
+        provider: str = "",
+        input_tokens: int = 0,
+        output_tokens: int = 0,
+        total_tokens: int = 0,
+        git_status: str = "",
+        duration_ms: int = 0,
+        success: bool = True,
+    ) -> None:
+        conn = self._connect()
+        try:
+            conn.execute(
+                """
+                INSERT INTO tool_events
+                (timestamp, session_id, cwd, project, tool_name, task,
+                 result_summary, model, provider, input_tokens, output_tokens,
+                 total_tokens, git_status, duration_ms, success)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    datetime.now(timezone.utc).isoformat(),
+                    session_id,
+                    cwd,
+                    project,
+                    tool_name,
+                    task,
+                    result_summary,
+                    model,
+                    provider,
+                    int(input_tokens),
+                    int(output_tokens),
+                    int(total_tokens),
+                    git_status,
+                    int(duration_ms),
+                    int(success),
+                ),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+    def record_session_summary(
+        self,
+        session_id: str,
+        cwd: str,
+        project: str,
+        model: str,
+        summary: str,
+        error_count: int = 0,
+        tool_count: int = 0,
+        recent_tasks: list[str] | None = None,
+    ) -> None:
+        conn = self._connect()
+        try:
+            conn.execute(
+                """
+                INSERT INTO session_summaries
+                (timestamp, session_id, cwd, project, model, summary,
+                 error_count, tool_count, recent_tasks)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    datetime.now(timezone.utc).isoformat(),
+                    session_id,
+                    cwd,
+                    project,
+                    model,
+                    summary,
+                    int(error_count),
+                    int(tool_count),
+                    json.dumps(recent_tasks or [], ensure_ascii=False),
+                ),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+    def latest_task(self, session_id: str) -> str:
+        """Return the most recently classified prompt for a session."""
+        conn = self._connect()
+        try:
+            row = conn.execute(
+                """
+                SELECT prompt FROM classifications
+                WHERE session_id = ? AND prompt IS NOT NULL AND prompt != ''
+                ORDER BY id DESC LIMIT 1
+                """,
+                (session_id,),
+            ).fetchone()
+            return str(row[0]) if row else ""
+        finally:
+            conn.close()
+
+    def session_stats(self, session_id: str) -> dict[str, Any]:
+        """Return tool/error counts and recent tasks for a session."""
+        conn = self._connect()
+        try:
+            tool_count = conn.execute(
+                "SELECT COUNT(*) FROM tool_events WHERE session_id = ?",
+                (session_id,),
+            ).fetchone()[0]
+            error_count = conn.execute(
+                "SELECT COUNT(*) FROM errors WHERE session_id = ?",
+                (session_id,),
+            ).fetchone()[0]
+            rows = conn.execute(
+                """
+                SELECT prompt FROM classifications
+                WHERE session_id = ? AND prompt IS NOT NULL AND prompt != ''
+                ORDER BY id DESC LIMIT 5
+                """,
+                (session_id,),
+            ).fetchall()
+        finally:
+            conn.close()
+        return {
+            "tool_count": int(tool_count),
+            "error_count": int(error_count),
+            "recent_tasks": [str(row[0]) for row in rows],
+        }
 
     def list_tables(self) -> set[str]:
         conn = self._connect()

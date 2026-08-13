@@ -18,6 +18,7 @@ from hooks._common import (
     emit_additional_context,
     extract,
     load_agents_md,
+    log_hook,
     read_stdin_json,
     safe_run,
 )
@@ -83,6 +84,10 @@ def run() -> None:
 
     has_context = bool(load_agents_md(cwd))
     emit_additional_context(build_suggestion(result, has_context), info["event"])
+    log_hook(
+        f"UserPromptSubmit session={info['session_id']} project={project} "
+        f"type={result.get('type')} complexity={result.get('complexity')}"
+    )
 
 
 if __name__ == "__main__":
