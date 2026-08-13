@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>AI Research Center</title>
+  <style>
+    body { font-family: "Segoe UI", sans-serif; margin: 24px; color: #111; }
+    h1 { font-size: 24px; }
+    .cards { display: flex; flex-wrap: wrap; gap: 16px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; min-width: 220px; }
+    table { border-collapse: collapse; margin-top: 16px; }
+    td, th { border: 1px solid #ccc; padding: 6px 10px; }
+  </style>
+</head>
+<body>
+  <h1>AI Research Center</h1>
+  <div class="cards">
+    <div class="card" id="overview"></div>
+    <div class="card" id="health"></div>
+  </div>
+  <h2>项目</h2>
+  <table id="projects"></table>
+  <h2>模型</h2>
+  <table id="models"></table>
+  <h2>Agent</h2>
+  <table id="agents"></table>
+  <script>
+    const API = 'http://127.0.0.1:8765';
+    async function get(path) { const r = await fetch(API + path); return r.json(); }
+    async function render() {
+      const overview = await get('/api/overview');
+      document.getElementById('overview').innerHTML =
+        `<b>今日 Token</b><br>${overview.total_tokens}<br>成本 ¥${overview.cost.toFixed(2)}`;
+      const health = await get('/api/health');
+      document.getElementById('health').innerHTML =
+        '<b>模型状态</b><br>' + health.map(h => `${h.provider}: ${h.status}`).join('<br>');
+      const tables = { projects: await get('/api/projects'), models: await get('/api/models'), agents: await get('/api/agents') };
+      for (const [id, rows] of Object.entries(tables)) {
+        document.getElementById(id).innerHTML =
+          '<tr><th>名称</th><th>Token</th><th>成本</th></tr>' +
+          rows.map(r => `<tr><td>${r.name}</td><td>${r.tokens}</td><td>¥${(r.cost||0).toFixed(2)}</td></tr>`).join('');
+      }
+    }
+    render().catch(err => document.getElementById('overview').innerText = '请先运行: python integration_server.py');
+  </script>
+</body>
+</html>
