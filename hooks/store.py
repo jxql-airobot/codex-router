@@ -96,6 +96,17 @@ class HookStore:
                     tool_count INTEGER DEFAULT 0,
                     recent_tasks TEXT
                 );
+                CREATE TABLE IF NOT EXISTS route_stats (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp TEXT NOT NULL,
+                    session_id TEXT,
+                    cwd TEXT,
+                    project TEXT,
+                    prompt TEXT,
+                    mode TEXT,
+                    reason TEXT,
+                    latency_ms INTEGER DEFAULT 0
+                );
                 """
             )
             conn.commit()
@@ -284,6 +295,64 @@ class HookStore:
             conn.commit()
         finally:
             conn.close()
+
+    def record_route(
+        self,
+        session_id: str,
+        cwd: str,
+        project: str,
+        prompt: str,
+        mode: str,
+        reason: str = "",
+        latency_ms: int = 0,
+    ) -> None:
+        conn = self._connect()
+        try:
+            conn.execute(
+                """
+                INSERT INTO route_stats
+                (timestamp, session_id, cwd, project, prompt, mode, reason, latency_ms)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    datetime.now(timezone.utc).isoformat(),
+                    session_id,
+                    cwd,
+                    project,
+                    prompt,
+                    mode,
+                    reason,
+                    int(latency_ms),
+                ),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+    def route_summary(self, start: str | None = None) -> dict[str, Any]:
+        """Return per-mode counts and average latency since ``start``."""
+        start = start or datetime.now(timezone.utc).date().isoformat()
+        conn = self._connect()
+        try:
+            rows = conn.execute(
+                """
+                SELECT mode, COUNT(*) AS n, COALESCE(AVG(latency_ms), 0) AS avg_ms
+                FROM route_stats WHERE timestamp >= ? GROUP BY mode
+                """,
+                (start,),
+            ).fetchall()
+        finally:
+            conn.close()
+        result = {
+            "fast": {"count": 0, "avg_latency_ms": 0.0},
+            "complex": {"count": 0, "avg_latency_ms": 0.0},
+        }
+        for row in rows:
+            mode = row["mode"]
+            if mode in result:
+                result[mode]["count"] = int(row["n"])
+                result[mode]["avg_latency_ms"] = round(float(row["avg_ms"]), 1)
+        return result
 
     def latest_task(self, session_id: str) -> str:
         """Return the most recently classified prompt for a session."""
