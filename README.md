@@ -521,6 +521,13 @@ Planner Agent 输出结构化 JSON 计划，包含任务依赖与优先级。
 当前为接口与占位实现，后续按阶段补齐核心闭环。
 
 
+## Supervisor 动态组队（v4.2）
+
+- `supervisor/` 任务理解、Agent 选择、团队生成、任务规划、结果合并
+- `team/` 动态团队、Agent 状态、任务分配
+- 根据 Planning Level 自动组建 AI 团队
+
+
 ## 本地 API 服务（TokenTracker 集成）
 
 ```powershell
