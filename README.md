@@ -497,3 +497,11 @@ codex --usage-cn --detail
 - 复杂任务 → Planner + Coder + Tester + Reviewer
 
 Planner Agent 输出结构化 JSON 计划，包含任务依赖与优先级。
+
+
+## Desktop Assistant + 三级智能规划（v2.5 Extension）
+
+- `desktop/` AI 状态中心与快捷方式生成
+- `planner/` 三级规划判断：Direct Execute / Task Organization / Full Planning
+- 自动识别任务列表、文件路径、执行动作与输出要求
+- `planning_stats` 统计 Planner 节省的 Token
