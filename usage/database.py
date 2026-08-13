@@ -34,10 +34,33 @@ class UsageDatabase:
                 total_tokens INTEGER DEFAULT 0,
                 cost REAL DEFAULT 0,
                 task_id TEXT,
-                task TEXT
+                task TEXT,
+                commit_id TEXT,
+                files_changed INTEGER DEFAULT 0,
+                tests_added INTEGER DEFAULT 0,
+                success INTEGER DEFAULT 0
             )
             """
         )
+        self._conn.commit()
+        self._ensure_columns()
+
+    def _ensure_columns(self) -> None:
+        existing = {
+            row["name"]
+            for row in self._conn.execute("PRAGMA table_info(usage_records)").fetchall()
+        }
+        migrations = {
+            "commit_id": "TEXT",
+            "files_changed": "INTEGER DEFAULT 0",
+            "tests_added": "INTEGER DEFAULT 0",
+            "success": "INTEGER DEFAULT 0",
+        }
+        for column, definition in migrations.items():
+            if column not in existing:
+                self._conn.execute(
+                    f"ALTER TABLE usage_records ADD COLUMN {column} {definition}"
+                )
         self._conn.commit()
 
     def insert(self, record: UsageRecord) -> int:
@@ -45,8 +68,9 @@ class UsageDatabase:
             """
             INSERT INTO usage_records
             (timestamp, project, agent, provider, model, input_tokens,
-             output_tokens, cached_tokens, total_tokens, cost, task_id, task)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             output_tokens, cached_tokens, total_tokens, cost, task_id, task,
+             commit_id, files_changed, tests_added, success)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 record.timestamp,
@@ -61,6 +85,10 @@ class UsageDatabase:
                 record.cost,
                 record.task_id,
                 record.task,
+                record.commit_id,
+                record.files_changed,
+                record.tests_added,
+                int(record.success),
             ),
         )
         self._conn.commit()
@@ -98,7 +126,8 @@ class UsageDatabase:
     def recent(self, limit: int = 10) -> list[dict[str, Any]]:
         rows = self._conn.execute(
             """
-            SELECT timestamp, project, agent, provider, model, total_tokens, cost
+            SELECT timestamp, project, agent, provider, model, total_tokens, cost,
+                   commit_id, files_changed, tests_added, success
             FROM usage_records ORDER BY timestamp DESC LIMIT ?
             """,
             (limit,),

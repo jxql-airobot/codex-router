@@ -20,3 +20,7 @@ class UsageRecord:
     total_tokens: int = 0
     cost: float = 0.0
     task_id: str = ""
+    commit_id: str = ""
+    files_changed: int = 0
+    tests_added: int = 0
+    success: bool = False
