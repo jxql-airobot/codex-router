@@ -543,6 +543,12 @@ Planner Agent 输出结构化 JSON 计划，包含任务依赖与优先级。
 - `desktop/notifier.py` 通知占位
 
 
+## 项目长期记忆（v4.5）
+
+- `memory/project_memory_store.py` 持久化设计决策、失败经验、工程经验
+- 支持按项目查询与历史回答
+
+
 ## 本地 API 服务（TokenTracker 集成）
 
 ```powershell
