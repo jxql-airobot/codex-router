@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>AI开发生产力中心</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+</head>
+<body>
+  <h1>AI开发生产力中心</h1>
+  <div id="overview"></div>
+  <div id="heatmap" style="width:100%;height:220px"></div>
+  <div id="projects" style="width:100%;height:300px"></div>
+  <div id="models" style="width:100%;height:300px"></div>
+  <div id="agents" style="width:100%;height:300px"></div>
+  <script>
+    async function get(path) { const r = await fetch(path); return r.json(); }
+    async function render() {
+      const overview = await get('/api/overview');
+      document.getElementById('overview').innerText =
+        `今日AI使用情况：总Token ${overview.total_tokens}，输入 ${overview.input_tokens}，输出 ${overview.output_tokens}，成本 ¥${overview.cost.toFixed(2)}`;
+      const projects = await get('/api/projects');
+      const models = await get('/api/models');
+      const agents = await get('/api/agents');
+      function bar(el, data, name) {
+        const chart = echarts.init(document.getElementById(el));
+        chart.setOption({
+          title: { text: name },
+          xAxis: { type: 'category', data: data.map(d => d.name) },
+          yAxis: { type: 'value' },
+          series: [{ type: 'bar', data: data.map(d => d.tokens) }]
+        });
+      }
+      bar('projects', projects, '项目消耗排行');
+      bar('models', models, '模型使用比例');
+      bar('agents', agents, 'Agent工作量');
+    }
+    render();
+  </script>
+</body>
+</html>

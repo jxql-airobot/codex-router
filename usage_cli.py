@@ -6,6 +6,7 @@ import argparse
 from datetime import datetime, timezone
 
 from usage.tracker import UsageTracker
+from analytics.statistics import breakdowns, chinese_number
 
 
 def _fmt(value: float) -> str:
@@ -41,6 +42,35 @@ def render(detail: bool = False) -> str:
         for row in tracker.database.breakdown("agent"):
             lines.append(f"{row['name']}: {_fmt(row['tokens'])}")
 
+    tracker.close()
+    return "\n".join(lines)
+
+
+def render_cn(detail: bool = False) -> str:
+    tracker = UsageTracker()
+    today = tracker.database.total_since(datetime.now(timezone.utc).date().isoformat())
+    data = breakdowns(tracker)
+    lines = [
+        "AI开发统计",
+        "",
+        f"今日Token: {chinese_number(today['total_tokens'])}",
+        f"成本: ¥{today['cost']:.2f}",
+    ]
+    if data["projects"]:
+        lines.append(f"主要项目: {data['projects'][0]['name']}")
+    if data["models"]:
+        lines.append(f"主要模型: {data['models'][0]['name']}")
+    if detail:
+        lines.append("")
+        lines.append("项目排行:")
+        for row in data["projects"]:
+            lines.append(f"{row['name']}: {chinese_number(row['tokens'])}")
+        lines.append("模型使用:")
+        for row in data["models"]:
+            lines.append(f"{row['name']}: {chinese_number(row['tokens'])}")
+        lines.append("Agent贡献:")
+        for row in data["agents"]:
+            lines.append(f"{row['name']}: {chinese_number(row['tokens'])}")
     tracker.close()
     return "\n".join(lines)
 

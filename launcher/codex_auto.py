@@ -51,6 +51,8 @@ ROUTER_BOOL_FLAGS = {
     "--workflow-status",
     "--usage",
     "--detail",
+    "--dashboard",
+    "--usage-cn",
     "--yes",
     "--no",
     "--dry-run",
@@ -139,6 +141,8 @@ class LauncherArgs:
     agent_name: str | None = None
     usage: bool = False
     detail: bool = False
+    dashboard: bool = False
+    usage_cn: bool = False
 
 
 def parse_launcher_args(argv: list[str]) -> LauncherArgs:
@@ -194,6 +198,10 @@ def parse_launcher_args(argv: list[str]) -> LauncherArgs:
                 result.usage = True
             elif arg == "--detail":
                 result.detail = True
+            elif arg == "--dashboard":
+                result.dashboard = True
+            elif arg == "--usage-cn":
+                result.usage_cn = True
             elif arg == "--yes":
                 result.yes = True
             elif arg == "--no":
@@ -392,6 +400,26 @@ def main(argv: list[str] | None = None) -> int:
         from usage_cli import render
 
         print(render(detail=args.detail))
+        return 0
+
+    if args.usage_cn:
+        from usage_cli import render_cn
+
+        print(render_cn(detail=args.detail))
+        return 0
+
+    if args.dashboard:
+        from analytics.statistics import chinese_number, overview
+        from pathlib import Path
+
+        data = overview()
+        print("AI开发生产力中心")
+        print(f"今日Token: {chinese_number(data['total_tokens'])}")
+        print(f"成本: ¥{data['cost']:.2f}")
+        print(
+            "Dashboard 前端:",
+            Path(__file__).resolve().parents[1] / "dashboard" / "frontend" / "index.html",
+        )
         return 0
 
     task_parts = list(args.task_parts)

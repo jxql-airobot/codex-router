@@ -414,3 +414,20 @@ codex --usage --detail
 ```powershell
 python dashboard/app.py
 ```
+
+
+## 中文 AI 开发生产力面板（v2.2）
+
+在 Token Usage Monitor 之上增加 analytics 与 Web Dashboard：
+
+```powershell
+codex --dashboard
+codex --usage-cn
+codex --usage-cn --detail
+```
+
+- `analytics/statistics.py` 中文单位格式化与统计
+- `analytics/heatmap.py` 每日 Token 活跃度
+- `analytics/efficiency.py` Token / Commit / 文件 / 测试效率
+- `dashboard/backend/api.py` FastAPI 接口（可选依赖）
+- `dashboard/frontend/index.html` ECharts 中文页面

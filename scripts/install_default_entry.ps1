@@ -72,7 +72,7 @@ if (Test-Path -LiteralPath $MemoryDest) {
 }
 Copy-Item -LiteralPath (Join-Path $Source 'memory') -Destination $MemoryDest -Recurse
 
-foreach ($Dir in @('git_manager', 'task_manager', 'report', 'vector_store', 'knowledge', 'rag', 'project_manager', 'providers', 'orchestrator', 'workflows', 'usage', 'dashboard', 'config')) {
+foreach ($Dir in @('git_manager', 'task_manager', 'report', 'vector_store', 'knowledge', 'rag', 'project_manager', 'providers', 'orchestrator', 'workflows', 'usage', 'dashboard', 'config', 'analytics')) {
     $ExtraDest = Join-Path $InstallDir $Dir
     if (-not $ExtraDest.StartsWith($InstallDir, [System.StringComparison]::OrdinalIgnoreCase)) {
         throw "Refusing to delete unexpected path: $ExtraDest"
