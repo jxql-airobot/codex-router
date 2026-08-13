@@ -67,6 +67,48 @@ agent_adapters:
     enabled: false
     class: agents.local_agent.adapter.LocalAgentAdapter
 
+providers:
+  openai:
+    enabled: true
+    api_key_env: OPENAI_API_KEY
+  deepseek:
+    enabled: true
+    api_key_env: DEEPSEEK_API_KEY
+  zhipu:
+    enabled: true
+    api_key_env: ZHIPU_API_KEY
+  moonshot:
+    enabled: true
+    api_key_env: MOONSHOT_API_KEY
+  qwen:
+    enabled: true
+    api_key_env: DASHSCOPE_API_KEY
+
+role_routing:
+  architect:
+    provider: openai
+    model: gpt-4.1
+  coder:
+    provider: deepseek
+    model: deepseek-chat
+  reviewer:
+    provider: zhipu
+    model: glm-4
+  researcher:
+    provider: moonshot
+    model: moonshot-v1-8k
+  knowledge:
+    provider: qwen
+    model: qwen-plus
+  tester:
+    provider: deepseek
+    model: deepseek-chat
+
+fallback:
+  coder:
+    - deepseek
+    - qwen
+
 launcher:
   codex_bin: codex-real
   mode: exec
