@@ -10,6 +10,7 @@ from supervisor.result_merger import merge_results
 from supervisor.task_analyzer import analyze_task
 from supervisor.team_builder import build_team
 from supervisor.workflow_planner import plan_tasks
+from task_graph.subtask_decider import decide_subtasks
 from team.team_state import AgentState
 
 
@@ -21,6 +22,7 @@ class SupervisorResult:
     tasks: list[dict[str, Any]] = field(default_factory=list)
     outputs: dict[str, Any] = field(default_factory=dict)
     success: bool = True
+    decision: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -30,6 +32,7 @@ class SupervisorResult:
             "tasks": self.tasks,
             "outputs": self.outputs,
             "success": self.success,
+            "decision": self.decision,
         }
 
 
@@ -40,6 +43,7 @@ class SupervisorAgent:
         self.config = config or {}
 
     def run(self, task: str, project: str = "") -> SupervisorResult:
+        decision = decide_subtasks(task)
         analysis = analyze_task(task, project)
         agents = select_agents(analysis)
         team = build_team(agents, self.config)
@@ -55,4 +59,5 @@ class SupervisorAgent:
             team=team,
             tasks=tasks,
             outputs=outputs,
+            decision=decision,
         )

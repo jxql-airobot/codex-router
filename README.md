@@ -528,6 +528,13 @@ Planner Agent 输出结构化 JSON 计划，包含任务依赖与优先级。
 - 根据 Planning Level 自动组建 AI 团队
 
 
+## 智能子任务拆解策略（v4.3.1）
+
+- `task_graph/` 判断任务是否需要拆解
+- Level 0 直接执行 / Level 1 轻量拆解 / Level 2 完整 Task Graph
+- 已规划任务、明确修改、Bug/文档/格式任务不拆
+
+
 ## 本地 API 服务（TokenTracker 集成）
 
 ```powershell
