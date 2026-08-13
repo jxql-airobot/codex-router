@@ -519,3 +519,14 @@ Planner Agent 输出结构化 JSON 计划，包含任务依赖与优先级。
 - `project_agents/` 项目级 AI 团队
 
 当前为接口与占位实现，后续按阶段补齐核心闭环。
+
+
+## 本地 API 服务（TokenTracker 集成）
+
+```powershell
+python integration_server.py
+```
+
+启动 `http://127.0.0.1:8765`，提供 `/api/overview`、`/api/projects`、
+`/api/models`、`/api/agents`、`/api/efficiency`、`/api/classification`、
+`/api/heatmap`、`/api/health` 等接口，供 TokenTracker 前端调用。
