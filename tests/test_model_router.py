@@ -66,7 +66,7 @@ class RouteRoleTests(unittest.TestCase):
 
     def test_coder_fallback(self):
         plan = route_role("实现功能", CONFIG)
-        self.assertEqual(plan["fallback"], ["deepseek", "qwen"])
+        self.assertEqual(plan["fallback"], ["deepseek", "qwen", "glm"])
 
 
 class ProviderLoadingTests(unittest.TestCase):
@@ -125,10 +125,10 @@ class ProviderClassTests(unittest.TestCase):
 
 class FallbackTests(unittest.TestCase):
     def test_fallback_chain(self):
-        self.assertEqual(fallback_chain("coder", CONFIG), ["deepseek", "qwen"])
+        self.assertEqual(fallback_chain("coder", CONFIG), ["deepseek", "qwen", "glm"])
 
-    def test_no_fallback_for_other_role(self):
-        self.assertEqual(fallback_chain("architect", CONFIG), [])
+    def test_no_fallback_for_knowledge(self):
+        self.assertEqual(fallback_chain("knowledge", CONFIG), [])
 
 
 class ConfigTests(unittest.TestCase):

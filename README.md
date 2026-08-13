@@ -475,3 +475,14 @@ codex --usage-cn --detail
 | Researcher | Kimi | moonshot-v1-8k |
 | Knowledge | Qwen | qwen-plus |
 | Tester | DeepSeek | deepseek-chat |
+
+
+## Provider 健康检查与自动 Fallback（v2.4 Extension）
+
+- `providers/health_check.py` 状态检查（不消耗真实余额）
+- `providers/mock_provider.py` Mock 测试 Provider
+- `orchestrator/fallback_manager.py` 自动切换与任务恢复
+- `providers/budget.py` 预算阈值管理
+
+状态：`available / warning / limited / unavailable`；余额不足会中文提醒，
+失败时按 `fallback` 链切换，任务状态可保存并从当前阶段恢复。
