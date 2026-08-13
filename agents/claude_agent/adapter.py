@@ -13,7 +13,7 @@ class ClaudeAgentAdapter(BaseAgent):
 
     def execute(self, task: str, context: str = "") -> AgentResult:
         return AgentResult(
-            ok=False,
+            success=False,
             output="Claude adapter 已注册，但默认关闭；启用后配置 API key 即可使用。",
             metadata={"provider": "claude"},
         )

@@ -13,7 +13,7 @@ class DeepSeekAgentAdapter(BaseAgent):
 
     def execute(self, task: str, context: str = "") -> AgentResult:
         return AgentResult(
-            ok=False,
+            success=False,
             output="DeepSeek adapter 已注册，但尚未绑定 API key；请在 config.yaml 配置后调用。",
             metadata={"provider": "deepseek"},
         )

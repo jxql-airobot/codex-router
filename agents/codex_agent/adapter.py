@@ -56,4 +56,4 @@ class CodexAgentAdapter(BaseAgent):
             except OSError:
                 pass
 
-        return AgentResult(ok=code == 0, output=output, metadata={"code": code})
+        return AgentResult(success=code == 0, output=output, metadata={"code": code})
