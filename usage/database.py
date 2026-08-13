@@ -109,6 +109,7 @@ class UsageDatabase:
             SELECT COALESCE(SUM(total_tokens),0) AS total_tokens,
                    COALESCE(SUM(input_tokens),0) AS input_tokens,
                    COALESCE(SUM(output_tokens),0) AS output_tokens,
+                   COALESCE(SUM(cached_tokens),0) AS cached_tokens,
                    COALESCE(SUM(cost),0) AS cost
             FROM usage_records WHERE timestamp >= ?
             """,

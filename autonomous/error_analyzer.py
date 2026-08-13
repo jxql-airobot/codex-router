@@ -4,4 +4,5 @@ from __future__ import annotations
 
 
 def analyze_error(output: str) -> dict:
-    return {"has_error": bool(output), "summary": output[:200]}
+    text = output.strip()
+    return {"has_error": bool(text), "summary": text[:200]}

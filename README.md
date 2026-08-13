@@ -535,6 +535,14 @@ Planner Agent 输出结构化 JSON 计划，包含任务依赖与优先级。
 - 已规划任务、明确修改、Bug/文档/格式任务不拆
 
 
+## 开发者体验（v4.4）
+
+- `analytics/token_dashboard.py` Token 总览、模型/项目统计、缓存收益
+- `project_center.py` 项目管理
+- `task_history.py` 任务历史
+- `desktop/notifier.py` 通知占位
+
+
 ## 本地 API 服务（TokenTracker 集成）
 
 ```powershell
