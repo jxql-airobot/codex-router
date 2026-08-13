@@ -177,6 +177,18 @@ codex-router/
 │   └── deepseek_provider.py
 ├── workflows/
 │   └── developer_workflow.yaml
+├── usage/
+│   ├── tracker.py
+│   ├── database.py
+│   ├── models.py
+│   ├── calculator.py
+│   └── collector.py
+├── dashboard/
+│   ├── app.py
+│   ├── charts.py
+│   └── widgets.py
+├── config/
+│   └── pricing.yaml
 ├── memory/
 │   ├── __init__.py
 │   ├── project_scanner.py
@@ -202,6 +214,7 @@ codex-router/
 ├── project_manager.py
 ├── platform.py
 ├── workflow.py
+├── usage_cli.py
 ├── git_lifecycle.py
 ├── rag_query.py
 ├── launcher/
@@ -383,4 +396,21 @@ codex --agent planner "重构ROS2机器人控制模块"
 
 # 查看 workflow 状态
 codex --workflow-status
+```
+
+
+## Token Usage Monitoring（v2.1）
+
+统一记录模型调用消耗，SQLite 存储，按模型/项目/Agent 统计成本：
+
+```powershell
+codex --usage
+codex --usage --detail
+```
+
+价格配置位于 `config/pricing.yaml`，支持 DeepSeek / GPT / Claude / Gemini /
+本地模型，不硬编码。桌面 Dashboard 入口：
+
+```powershell
+python dashboard/app.py
 ```

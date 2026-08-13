@@ -49,6 +49,8 @@ ROUTER_BOOL_FLAGS = {
     "--git",
     "--workflow",
     "--workflow-status",
+    "--usage",
+    "--detail",
     "--yes",
     "--no",
     "--dry-run",
@@ -135,6 +137,8 @@ class LauncherArgs:
     workflow: bool = False
     workflow_status: bool = False
     agent_name: str | None = None
+    usage: bool = False
+    detail: bool = False
 
 
 def parse_launcher_args(argv: list[str]) -> LauncherArgs:
@@ -186,6 +190,10 @@ def parse_launcher_args(argv: list[str]) -> LauncherArgs:
                 result.workflow = True
             elif arg == "--workflow-status":
                 result.workflow_status = True
+            elif arg == "--usage":
+                result.usage = True
+            elif arg == "--detail":
+                result.detail = True
             elif arg == "--yes":
                 result.yes = True
             elif arg == "--no":
@@ -378,6 +386,12 @@ def main(argv: list[str] | None = None) -> int:
         workflow = load_workflow(WORKFLOW_PATH)
         print("workflow:", " -> ".join(workflow.steps))
         print("agents:", build_manager().names())
+        return 0
+
+    if args.usage:
+        from usage_cli import render
+
+        print(render(detail=args.detail))
         return 0
 
     task_parts = list(args.task_parts)
