@@ -33,6 +33,7 @@ $RuntimeFiles = @(
     'router.py',
     'git_lifecycle.py',
     'rag_query.py',
+    'agent_registry.py',
     'requirements.txt'
 )
 foreach ($File in $RuntimeFiles) {

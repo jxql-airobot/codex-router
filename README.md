@@ -70,6 +70,26 @@ python rag_query.py "为什么这个模块这样设计？"
 输出检索到的文档/代码/commit 片段与相关度分数。向量库使用依赖-free 的
 hashing trick，无需外部模型或数据库。
 
+## Agent Adapter Framework（v1.6）
+
+模型 provider 可插拔：
+
+```text
+agents/base_agent.py            统一 BaseAgent 接口
+agents/codex_agent/adapter.py   Codex
+agents/deepseek_agent/          DeepSeek
+agents/claude_agent/            Claude
+agents/gemini_agent/            Gemini
+agents/local_agent/             Ollama / LM Studio
+```
+
+`config.yaml` 的 `agent_adapters` 控制启用状态与 adapter class，新增 provider
+只需增加 adapter 和注册配置，无需改动核心。查看已启用 adapter：
+
+```powershell
+python agent_registry.py
+```
+
 ## 文件结构
 
 ```text
@@ -77,17 +97,24 @@ codex-router/
 ├── codex-auto.py
 ├── codex-auto.ps1
 ├── codex-auto.cmd
+├── agent_registry.py
 ├── router.py
 ├── classifier.py
 ├── model_selector.py
 ├── config_loader.py
 ├── config.yaml
 ├── agents/
+│   ├── base_agent.py
 │   ├── supervisor.md
 │   ├── planner.md
 │   ├── coder.md
 │   ├── tester.md
-│   └── reviewer.md
+│   ├── reviewer.md
+│   ├── codex_agent/adapter.py
+│   ├── deepseek_agent/adapter.py
+│   ├── claude_agent/adapter.py
+│   ├── gemini_agent/adapter.py
+│   └── local_agent/adapter.py
 ├── memory/
 │   ├── __init__.py
 │   ├── project_scanner.py

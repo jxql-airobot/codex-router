@@ -47,6 +47,25 @@ agent_roles:
     model: pro
     sandbox: read-only
 
+agent_adapters:
+  codex:
+    enabled: true
+    class: agents.codex_agent.adapter.CodexAgentAdapter
+    options:
+      model_tier: flash
+  deepseek:
+    enabled: true
+    class: agents.deepseek_agent.adapter.DeepSeekAgentAdapter
+  claude:
+    enabled: false
+    class: agents.claude_agent.adapter.ClaudeAgentAdapter
+  gemini:
+    enabled: false
+    class: agents.gemini_agent.adapter.GeminiAgentAdapter
+  local:
+    enabled: false
+    class: agents.local_agent.adapter.LocalAgentAdapter
+
 launcher:
   codex_bin: codex-real
   mode: exec
