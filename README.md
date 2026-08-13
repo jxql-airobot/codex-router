@@ -103,6 +103,15 @@ Reviewer：
 由 `launcher/dynamic_planner.py` 负责领域识别与团队规划，`config.yaml` 的
 `agents.dynamic: true` 开启。
 
+## Multi-Agent Collaboration（v1.8）
+
+`launcher/collaboration.py` 提供并行协作原语：
+
+- 任务分配 `plan_parallel_tasks`
+- 并发执行 `run_parallel`
+- 结果合并 `merge_outputs`
+- 文件冲突检测 `detect_file_conflicts`
+
 ## 文件结构
 
 ```text
@@ -155,7 +164,8 @@ codex-router/
 │   ├── model_runner.py
 │   ├── execution_mode.py
 │   ├── agent_runner.py
-│   └── dynamic_planner.py
+│   ├── dynamic_planner.py
+│   └── collaboration.py
 ├── scripts/
 │   ├── install_default_entry.ps1
 │   └── uninstall_default_entry.ps1
