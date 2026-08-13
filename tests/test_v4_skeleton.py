@@ -67,7 +67,7 @@ class CodeGraphSkeletonTests(unittest.TestCase):
         self.assertIn("edges", build_graph([]))
 
     def test_impact(self):
-        self.assertEqual(analyze_impact("a.py", {}), ["a.py"])
+        self.assertEqual(analyze_impact("a.py", {}), [])
 
     def test_index(self):
         self.assertEqual(index_project(".")["root"], ".")

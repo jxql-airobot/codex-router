@@ -549,6 +549,12 @@ Planner Agent 输出结构化 JSON 计划，包含任务依赖与优先级。
 - 支持按项目查询与历史回答
 
 
+## 代码知识图谱（v4.6）
+
+- `code_graph/` 使用 Python AST 解析函数/类/imports/calls
+- 构建依赖图与影响分析
+
+
 ## 本地 API 服务（TokenTracker 集成）
 
 ```powershell
