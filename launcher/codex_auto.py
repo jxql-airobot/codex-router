@@ -13,7 +13,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from classifier import DiffStats, Factor, classify
+from classification.task_classifier import classify_task
 from config_loader import load_config
+from integration.session_manager import SessionManager
 from model_selector import select
 from memory.context_builder import build_context
 
@@ -29,6 +31,7 @@ from launcher.model_runner import RunPlan, build_command, resolve_codex_bin, run
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config.yaml"
+_AUTO_SESSIONS = SessionManager()
 
 
 # Router flags that consume a following value.
@@ -496,8 +499,22 @@ def main(argv: list[str] | None = None) -> int:
         args.mode_override,
     )
 
+    auto_plan = classify_task(
+        task, {"project_name": project_context.project_name}
+    )
+    auto_session_id = _AUTO_SESSIONS.start(task, auto_plan).session_id
+
     if not args.router_json:
         print(project_context.to_display())
+        print()
+        print("[Auto Plan]")
+        print(
+            "type={} workflow={} agents={}".format(
+                auto_plan["type"],
+                auto_plan["recommended_workflow"],
+                ", ".join(auto_plan["recommended_agents"]),
+            )
+        )
         print()
 
     if execution == "agent":
@@ -538,6 +555,11 @@ def main(argv: list[str] | None = None) -> int:
                 project_context=project_context.to_markdown(),
                 roles=roles,
             )
+            _AUTO_SESSIONS.finish(
+                auto_session_id,
+                "success" if exit_code == 0 else "failed",
+                tokens=classification.estimated_tokens,
+            )
             _maybe_git_report(args, exit_code, context_start)
             return exit_code
         exit_code = run_agent_pipeline(
@@ -546,6 +568,11 @@ def main(argv: list[str] | None = None) -> int:
             dry_run=False,
             project_context=project_context.to_markdown(),
             roles=roles,
+        )
+        _AUTO_SESSIONS.finish(
+            auto_session_id,
+            "success" if exit_code == 0 else "failed",
+            tokens=classification.estimated_tokens,
         )
         _maybe_git_report(args, exit_code, context_start)
         return exit_code
@@ -600,6 +627,11 @@ def main(argv: list[str] | None = None) -> int:
     codex_prompt = project_context.to_markdown() + "\n\n# 用户任务\n" + task
     plan = build_command(selection, codex_prompt, args.codex_args, config)
     exit_code = run(plan, dry_run=args.dry_run)
+    _AUTO_SESSIONS.finish(
+        auto_session_id,
+        "success" if exit_code == 0 else "failed",
+        tokens=classification.estimated_tokens,
+    )
     _maybe_git_report(args, exit_code, context_start)
     return exit_code
 

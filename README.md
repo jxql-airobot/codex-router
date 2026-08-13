@@ -189,6 +189,14 @@ codex-router/
 │   └── widgets.py
 ├── config/
 │   └── pricing.yaml
+├── classification/
+│   ├── intent.py
+│   ├── complexity.py
+│   └── task_classifier.py
+├── integration/
+│   ├── interceptor.py
+│   ├── codex_desktop.py
+│   └── session_manager.py
 ├── memory/
 │   ├── __init__.py
 │   ├── project_scanner.py
@@ -431,3 +439,18 @@ codex --usage-cn --detail
 - `analytics/efficiency.py` Token / Commit / 文件 / 测试效率
 - `dashboard/backend/api.py` FastAPI 接口（可选依赖）
 - `dashboard/frontend/index.html` ECharts 中文页面
+
+
+## Codex Desktop 智能集成层（v2.3）
+
+用户无需手动指定模式，`codex "任务"` 自动完成：
+
+1. 捕获任务
+2. 分析意图与领域
+3. 识别项目
+4. 评分复杂度
+5. 选择 workflow 与 Agent
+6. 记录 Session 与 Token
+
+由 `classification/`（意图/复杂度/任务分类）与 `integration/`
+（拦截器/桌面集成/Session 管理）实现，并自动写入 usage 记录。
