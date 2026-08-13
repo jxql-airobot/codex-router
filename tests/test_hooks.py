@@ -226,7 +226,7 @@ class BeforeTaskTests(HookTestCase):
                 {
                     "hook_event_name": "UserPromptSubmit",
                     "session_id": "s1",
-                    "prompt": "anything",
+                    "prompt": "修改代码",
                 },
             )
         self.assertEqual(HookStore().count("classifications"), 1)

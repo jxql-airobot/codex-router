@@ -7,6 +7,7 @@ suggests; it never changes the active model or blocks the turn.
 from __future__ import annotations
 
 import sys
+import time
 from pathlib import Path
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -62,7 +63,35 @@ def run() -> None:
     cwd = info["cwd"]
     project = detect_project(cwd)
     model = info["model"]
+    started = time.monotonic()
 
+    try:
+        from classification.task_mode import classify_mode
+
+        mode = classify_mode(prompt)
+    except Exception:
+        mode = {"mode": "complex", "reason": "classifier_failure", "confidence": 0.0}
+
+    latency_ms = int((time.monotonic() - started) * 1000)
+    HookStore().record_route(
+        info["session_id"],
+        cwd,
+        project,
+        prompt,
+        mode["mode"],
+        mode.get("reason", ""),
+        latency_ms,
+    )
+
+    # Fast path: skip the heavy pipeline, add no model context.
+    if mode["mode"] == "fast":
+        log_hook(
+            f"FastPath session={info['session_id']} project={project} "
+            f"reason={mode.get('reason')} latency={latency_ms}ms"
+        )
+        return
+
+    # Complex path: run the full analysis and surface advisory context.
     try:
         from classification.task_classifier import classify_task
 
@@ -85,8 +114,9 @@ def run() -> None:
     has_context = bool(load_agents_md(cwd))
     emit_additional_context(build_suggestion(result, has_context), info["event"])
     log_hook(
-        f"UserPromptSubmit session={info['session_id']} project={project} "
-        f"type={result.get('type')} complexity={result.get('complexity')}"
+        f"ComplexPath session={info['session_id']} project={project} "
+        f"type={result.get('type')} complexity={result.get('complexity')} "
+        f"latency={latency_ms}ms"
     )
 
 
