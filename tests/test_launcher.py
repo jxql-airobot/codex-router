@@ -55,7 +55,7 @@ class ArgParsingTests(unittest.TestCase):
         )
 
     def test_agent_and_direct_overrides(self):
-        self.assertEqual(parse_launcher_args(["--agent", "任务"]).mode_override, "agent")
+        self.assertEqual(parse_launcher_args(["--agent", "planner"]).agent_name, "planner")
         self.assertEqual(parse_launcher_args(["--direct", "任务"]).mode_override, "direct")
 
 
