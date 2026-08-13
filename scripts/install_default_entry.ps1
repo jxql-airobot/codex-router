@@ -31,6 +31,7 @@ $RuntimeFiles = @(
     'config_loader.py',
     'config.yaml',
     'router.py',
+    'git_lifecycle.py',
     'requirements.txt'
 )
 foreach ($File in $RuntimeFiles) {
@@ -64,6 +65,17 @@ if (Test-Path -LiteralPath $MemoryDest) {
     Remove-Item -LiteralPath $MemoryDest -Recurse -Force
 }
 Copy-Item -LiteralPath (Join-Path $Source 'memory') -Destination $MemoryDest -Recurse
+
+foreach ($Dir in @('git_manager', 'task_manager', 'report')) {
+    $ExtraDest = Join-Path $InstallDir $Dir
+    if (-not $ExtraDest.StartsWith($InstallDir, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Refusing to delete unexpected path: $ExtraDest"
+    }
+    if (Test-Path -LiteralPath $ExtraDest) {
+        Remove-Item -LiteralPath $ExtraDest -Recurse -Force
+    }
+    Copy-Item -LiteralPath (Join-Path $Source $Dir) -Destination $ExtraDest -Recurse
+}
 
 function Backup-Shim([string] $Extension) {
     $Real = Join-Path $NpmDir ("codex-real" + $Extension)

@@ -40,6 +40,25 @@ Stack: ROS2, Python, Gazebo, YOLO
 Recent: Vision Pipeline completed
 ```
 
+## Git Lifecycle（v1.4）
+
+独立的 Git 自动化闭环命令：
+
+```powershell
+# 只分析 + 建议 commit，不真正提交
+python git_lifecycle.py
+
+# 自动 git add + git commit
+python git_lifecycle.py --commit
+
+# commit 后 push origin 当前分支
+python git_lifecycle.py --commit --push
+```
+
+`git_lifecycle.py` 会扫描分支/远程/改动文件，分析新增/修改/删除，按
+`feat/fix/refactor/docs/test` 生成 commit，并输出 Task Report。`--push`
+只执行普通 `git push origin <branch>`，不会 force push。
+
 ## 文件结构
 
 ```text
@@ -62,6 +81,17 @@ codex-router/
 │   ├── __init__.py
 │   ├── project_scanner.py
 │   └── context_builder.py
+├── git_manager/
+│   ├── __init__.py
+│   ├── scanner.py
+│   ├── diff_analyzer.py
+│   ├── commit_generator.py
+│   └── operator.py
+├── task_manager/
+│   └── manager.py
+├── report/
+│   └── generator.py
+├── git_lifecycle.py
 ├── launcher/
 │   ├── codex_auto.py
 │   ├── model_runner.py
@@ -74,7 +104,9 @@ codex-router/
 ├── tests/
 │   ├── test_router.py
 │   ├── test_launcher.py
-│   └── test_execution_mode.py
+│   ├── test_execution_mode.py
+│   ├── test_memory.py
+│   └── test_git_lifecycle.py
 └── README.md
 ```
 

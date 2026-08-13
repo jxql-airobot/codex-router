@@ -46,6 +46,7 @@ ROUTER_BOOL_FLAGS = {
     "--auto",
     "--direct",
     "--agent",
+    "--git",
     "--yes",
     "--no",
     "--dry-run",
@@ -128,6 +129,7 @@ class LauncherArgs:
     mode: str | None = None
     model_switch: str | None = None
     mode_override: str | None = None
+    git: bool = False
 
 
 def parse_launcher_args(argv: list[str]) -> LauncherArgs:
@@ -166,6 +168,8 @@ def parse_launcher_args(argv: list[str]) -> LauncherArgs:
                 result.mode_override = "direct"
             elif arg == "--agent":
                 result.mode_override = "agent"
+            elif arg == "--git":
+                result.git = True
             elif arg == "--yes":
                 result.yes = True
             elif arg == "--no":
@@ -312,6 +316,23 @@ def format_agent_log(task: str, classification, config) -> str:
     return "\n".join(lines)
 
 
+def _maybe_git_report(args: LauncherArgs, exit_code: int, repo: str | None) -> None:
+    if not (args.git and exit_code == 0 and not args.dry_run):
+        return
+
+    from git_manager.commit_generator import generate_commit_message
+    from git_manager.diff_analyzer import analyze_diff
+    from git_manager.scanner import scan_git
+
+    diff = analyze_diff(repo)
+    info = scan_git(repo)
+    message = generate_commit_message(diff)
+    print("\n[Git Lifecycle]")
+    print(f"Branch: {info.branch or '-'}")
+    print(f"Changes: {diff.total}")
+    print(f"Suggested commit: {message}")
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     config = load_config(CONFIG_PATH)
@@ -409,18 +430,22 @@ def main(argv: list[str] | None = None) -> int:
         if args.dry_run or not agents_enabled:
             if not agents_enabled and not args.dry_run:
                 print("\nAgent 模式已禁用，仅输出编排预览。")
-            return run_agent_pipeline(
+            exit_code = run_agent_pipeline(
                 task,
                 config,
                 dry_run=True,
                 project_context=project_context.to_markdown(),
             )
-        return run_agent_pipeline(
+            _maybe_git_report(args, exit_code, context_start)
+            return exit_code
+        exit_code = run_agent_pipeline(
             task,
             config,
             dry_run=False,
             project_context=project_context.to_markdown(),
         )
+        _maybe_git_report(args, exit_code, context_start)
+        return exit_code
 
     if args.router_json:
         print(
@@ -471,7 +496,9 @@ def main(argv: list[str] | None = None) -> int:
 
     codex_prompt = project_context.to_markdown() + "\n\n# 用户任务\n" + task
     plan = build_command(selection, codex_prompt, args.codex_args, config)
-    return run(plan, dry_run=args.dry_run)
+    exit_code = run(plan, dry_run=args.dry_run)
+    _maybe_git_report(args, exit_code, context_start)
+    return exit_code
 
 
 if __name__ == "__main__":
