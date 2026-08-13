@@ -234,8 +234,49 @@ class BeforeTaskTests(HookTestCase):
 
 
 class AfterTaskTests(HookTestCase):
-    def test_records_usage_and_session(self):
+    def test_records_tool_event_and_usage(self):
         from hooks.after_task import run
+
+        self._run_hook(
+            run,
+            {
+                "hook_event_name": "PostToolUse",
+                "session_id": "s1",
+                "cwd": str(Path(self._tmp.name) / "p"),
+                "model": "deepseek-v4-pro",
+                "tool_name": "Bash",
+                "tool_input": "pytest",
+                "tool_response": "32 passed",
+                "usage": {"input_tokens": 10, "output_tokens": 20, "total_tokens": 30},
+            },
+        )
+        self.assertEqual(HookStore().count("tool_events"), 1)
+        conn = sqlite3.connect(str(get_data_dir() / "usage.db"))
+        try:
+            n = conn.execute("SELECT COUNT(*) FROM usage_records").fetchone()[0]
+        finally:
+            conn.close()
+        self.assertEqual(n, 1)
+
+    def test_ignores_non_tool_event(self):
+        from hooks.after_task import run
+
+        self._run_hook(
+            run,
+            {"hook_event_name": "SessionEnd", "session_id": "s1", "tool_name": "Bash"},
+        )
+        self.assertEqual(HookStore().count("tool_events"), 0)
+
+    def test_empty_payload_noop(self):
+        from hooks.after_task import run
+
+        self._run_hook(run, {})
+        self.assertEqual(HookStore().count("tool_events"), 0)
+
+
+class SessionEndTests(HookTestCase):
+    def test_records_summary_and_session(self):
+        from hooks.session_end import run
 
         self._run_hook(
             run,
@@ -248,18 +289,13 @@ class AfterTaskTests(HookTestCase):
             },
         )
         self.assertEqual(HookStore().count("session_events"), 1)
-        conn = sqlite3.connect(str(get_data_dir() / "usage.db"))
-        try:
-            n = conn.execute("SELECT COUNT(*) FROM usage_records").fetchone()[0]
-        finally:
-            conn.close()
-        self.assertEqual(n, 1)
+        self.assertEqual(HookStore().count("session_summaries"), 1)
 
-    def test_empty_payload_noop(self):
-        from hooks.after_task import run
+    def test_empty_payload_fail_open(self):
+        from hooks.session_end import run
 
         self._run_hook(run, {})
-        self.assertEqual(HookStore().count("session_events"), 1)
+        self.assertEqual(HookStore().count("session_summaries"), 1)
 
 
 class OnErrorTests(HookTestCase):
