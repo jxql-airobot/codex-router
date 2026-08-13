@@ -454,3 +454,24 @@ codex --usage-cn --detail
 
 由 `classification/`（意图/复杂度/任务分类）与 `integration/`
 （拦截器/桌面集成/Session 管理）实现，并自动写入 usage 记录。
+
+
+## Multi-Provider AI Team（v2.4）
+
+角色调度与国产模型 Provider：
+
+- `providers/base.py` 统一 BaseProvider
+- OpenAI / DeepSeek / GLM(智谱) / Kimi(月之暗面) / Qwen(通义)
+- `model_router.py` 根据任务关键词选择角色与模型
+- `config.yaml` 的 `providers` / `role_routing` / `fallback`
+
+默认角色模型：
+
+| 角色 | Provider | 模型 |
+| --- | --- | --- |
+| Architect | OpenAI | gpt-4.1 |
+| Coder | DeepSeek | deepseek-chat |
+| Reviewer | 智谱 GLM | glm-4 |
+| Researcher | Kimi | moonshot-v1-8k |
+| Knowledge | Qwen | qwen-plus |
+| Tester | DeepSeek | deepseek-chat |

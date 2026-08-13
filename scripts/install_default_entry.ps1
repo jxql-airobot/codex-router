@@ -38,6 +38,7 @@ $RuntimeFiles = @(
     'platform.py',
     'workflow.py',
     'usage_cli.py',
+    'model_router.py',
     'requirements.txt'
 )
 foreach ($File in $RuntimeFiles) {
