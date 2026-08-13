@@ -505,3 +505,17 @@ Planner Agent 输出结构化 JSON 计划，包含任务依赖与优先级。
 - `planner/` 三级规划判断：Direct Execute / Task Organization / Full Planning
 - 自动识别任务列表、文件路径、执行动作与输出要求
 - `planning_stats` 统计 Planner 节省的 Token
+
+
+## v4.0 Personal AI Research Platform（Stage 1 骨架）
+
+已建立顶层架构骨架：
+
+- `supervisor/` 总控 Agent
+- `autonomous/` 自主开发闭环
+- `memory/` 项目长期记忆
+- `code_graph/` 代码知识图谱
+- `experiment/` 科研实验 Agent
+- `project_agents/` 项目级 AI 团队
+
+当前为接口与占位实现，后续按阶段补齐核心闭环。

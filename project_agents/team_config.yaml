@@ -1,0 +1,12 @@
+AI-Robot-Demo:
+  - Robot Agent
+  - ROS2 Agent
+  - Control Agent
+  - Simulation Agent
+  - Test Agent
+InduAgent:
+  - PLC Agent
+  - RAG Agent
+  - Knowledge Agent
+  - Backend Agent
+  - Test Agent
