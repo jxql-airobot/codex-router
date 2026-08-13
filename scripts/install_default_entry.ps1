@@ -35,6 +35,7 @@ $RuntimeFiles = @(
     'rag_query.py',
     'agent_registry.py',
     'project_manager.py',
+    'platform.py',
     'requirements.txt'
 )
 foreach ($File in $RuntimeFiles) {

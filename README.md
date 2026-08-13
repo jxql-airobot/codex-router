@@ -123,6 +123,18 @@ python project_manager.py list
 python project_manager.py load C:\path\to\project
 ```
 
+## Universal AI Engineering Platform（v2.0）
+
+`platform.py` 提供统一平台入口：
+
+```powershell
+python platform.py status
+python platform.py run "修复Python报错" --dry-run
+```
+
+它组合了 Router / Memory / RAG / Agents / Git / Test / Report 全链路，
+形成多模型、多智能体的软件工程自动化平台。
+
 ## 文件结构
 
 ```text
@@ -171,6 +183,7 @@ codex-router/
 ├── project_manager/
 │   └── manager.py
 ├── project_manager.py
+├── platform.py
 ├── git_lifecycle.py
 ├── rag_query.py
 ├── launcher/
