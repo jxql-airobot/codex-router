@@ -1,13 +1,13 @@
 {
-  "description": "codex-router advisory hooks (fail-open). Install by copying to ~/.codex/hooks.json and trusting them via /hooks.",
+  "description": "codex-router native hooks (fail-open). Install by copying to ~/.codex/hooks.json and trusting them via /hooks.",
   "hooks": {
     "UserPromptSubmit": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "python hooks/before_task.py",
-            "commandWindows": "python \"C:/Users/zlx06/Documents/Codex/2026-08-13/codex-deepseek-flash-pro-codex-ai/work/codex-router-github/hooks/before_task.py\"",
+            "command": "python \"C:/Users/zlx06/.codex-router/hooks/before_task.py\"",
+            "commandWindows": "python \"C:/Users/zlx06/.codex-router/hooks/before_task.py\"",
             "timeout": 5,
             "statusMessage": "分析任务"
           }
@@ -20,8 +20,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python hooks/on_error.py",
-            "commandWindows": "python \"C:/Users/zlx06/Documents/Codex/2026-08-13/codex-deepseek-flash-pro-codex-ai/work/codex-router-github/hooks/on_error.py\"",
+            "command": "python \"C:/Users/zlx06/.codex-router/hooks/after_task.py\"",
+            "commandWindows": "python \"C:/Users/zlx06/.codex-router/hooks/after_task.py\"",
             "timeout": 5
           }
         ]
@@ -32,9 +32,9 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python hooks/after_task.py",
-            "commandWindows": "python \"C:/Users/zlx06/Documents/Codex/2026-08-13/codex-deepseek-flash-pro-codex-ai/work/codex-router-github/hooks/after_task.py\"",
-            "timeout": 3
+            "command": "python \"C:/Users/zlx06/.codex-router/hooks/session_end.py\"",
+            "commandWindows": "python \"C:/Users/zlx06/.codex-router/hooks/session_end.py\"",
+            "timeout": 5
           }
         ]
       }
