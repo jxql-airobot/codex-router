@@ -46,8 +46,9 @@ ROUTER_BOOL_FLAGS = {
     "--flash",
     "--auto",
     "--direct",
-    "--agent",
     "--git",
+    "--workflow",
+    "--workflow-status",
     "--yes",
     "--no",
     "--dry-run",
@@ -131,6 +132,9 @@ class LauncherArgs:
     model_switch: str | None = None
     mode_override: str | None = None
     git: bool = False
+    workflow: bool = False
+    workflow_status: bool = False
+    agent_name: str | None = None
 
 
 def parse_launcher_args(argv: list[str]) -> LauncherArgs:
@@ -158,6 +162,15 @@ def parse_launcher_args(argv: list[str]) -> LauncherArgs:
             i += 2
             continue
 
+        if arg == "--agent":
+            if i + 1 < len(argv) and not argv[i + 1].startswith("-"):
+                result.agent_name = argv[i + 1]
+                i += 2
+            else:
+                result.mode_override = "agent"
+                i += 1
+            continue
+
         if arg in ROUTER_BOOL_FLAGS:
             if arg == "--pro":
                 result.override = "pro"
@@ -167,10 +180,12 @@ def parse_launcher_args(argv: list[str]) -> LauncherArgs:
                 result.override = None
             elif arg == "--direct":
                 result.mode_override = "direct"
-            elif arg == "--agent":
-                result.mode_override = "agent"
             elif arg == "--git":
                 result.git = True
+            elif arg == "--workflow":
+                result.workflow = True
+            elif arg == "--workflow-status":
+                result.workflow_status = True
             elif arg == "--yes":
                 result.yes = True
             elif arg == "--no":
@@ -356,6 +371,15 @@ def main(argv: list[str] | None = None) -> int:
     if args.model_switch:
         launcher_cfg["model_switch"] = args.model_switch
 
+    if args.workflow_status:
+        from orchestrator.workflow import load_workflow
+        from workflow import WORKFLOW_PATH, build_manager
+
+        workflow = load_workflow(WORKFLOW_PATH)
+        print("workflow:", " -> ".join(workflow.steps))
+        print("agents:", build_manager().names())
+        return 0
+
     task_parts = list(args.task_parts)
     if task_parts and task_parts[0] == "-":
         stdin_text = sys.stdin.read()
@@ -365,6 +389,39 @@ def main(argv: list[str] | None = None) -> int:
     if not task:
         print("错误：没有提供任务文本。", file=sys.stderr)
         return 2
+
+    if args.workflow or args.agent_name:
+        from memory.context_builder import build_context
+        from workflow import build_manager, run_workflow
+
+        context_root = args.repo if args.repo else None
+        project_context = build_context(start=context_root)
+        if args.agent_name:
+            agent = build_manager().get(args.agent_name)
+            result = agent.execute(
+                task,
+                {
+                    "project_name": project_context.project_name,
+                    "tech_stack": project_context.tech_stack,
+                    "repo": args.repo,
+                },
+            )
+            print(result.output)
+            return 0 if result.success else 1
+
+        run = run_workflow(task, args.repo)
+        print(
+            json.dumps(
+                {
+                    "success": run.success,
+                    "outputs": run.outputs,
+                    "history": run.history,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return 0 if run.success else 1
 
     # Text-level /model command is a fallback when no --flash/--pro is given.
     from router import parse_model_command

@@ -149,17 +149,34 @@ codex-router/
 ├── config_loader.py
 ├── config.yaml
 ├── agents/
+│   ├── base.py
 │   ├── base_agent.py
 │   ├── supervisor.md
 │   ├── planner.md
 │   ├── coder.md
 │   ├── tester.md
 │   ├── reviewer.md
+│   ├── planner_agent.py
+│   ├── coder_agent.py
+│   ├── tester_agent.py
+│   ├── reviewer_agent.py
+│   ├── git_agent.py
 │   ├── codex_agent/adapter.py
 │   ├── deepseek_agent/adapter.py
 │   ├── claude_agent/adapter.py
 │   ├── gemini_agent/adapter.py
 │   └── local_agent/adapter.py
+├── orchestrator/
+│   ├── supervisor.py
+│   ├── workflow.py
+│   ├── task_queue.py
+│   └── agent_manager.py
+├── providers/
+│   ├── base_provider.py
+│   ├── codex_provider.py
+│   └── deepseek_provider.py
+├── workflows/
+│   └── developer_workflow.yaml
 ├── memory/
 │   ├── __init__.py
 │   ├── project_scanner.py
@@ -184,6 +201,7 @@ codex-router/
 │   └── manager.py
 ├── project_manager.py
 ├── platform.py
+├── workflow.py
 ├── git_lifecycle.py
 ├── rag_query.py
 ├── launcher/
@@ -345,3 +363,24 @@ python -m unittest discover -s tests -v
 覆盖：Direct/Enhanced/Agent 模式判定、`--direct` / `--agent` 覆盖、Agent
 角色与模型、项目上下文扫描（空目录 / Git / ROS2）、参数透传、显式
 `--model` 尊重，以及 `cli` / `config` / `env` 三种命令构建。
+
+
+## Universal Developer Agent Workflow（v2.1）
+
+Agent 与 Provider 分离：
+
+- `agents/base.py` 统一 BaseAgent / AgentResult
+- `providers/` 统一 LLMProvider，Codex 已实现，DeepSeek 预留
+- `orchestrator/` 负责任务队列、Agent 管理、Supervisor 调度与 workflow
+- 5 个内置 Agent：Planner / Coder / Tester / Reviewer / Git
+
+```powershell
+# 运行默认 developer workflow
+codex --workflow "重构ROS2机器人控制模块"
+
+# 指定单个 Agent
+codex --agent planner "重构ROS2机器人控制模块"
+
+# 查看 workflow 状态
+codex --workflow-status
+```

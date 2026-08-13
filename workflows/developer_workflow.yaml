@@ -1,0 +1,10 @@
+workflow:
+  - planner
+  - coder
+  - tester
+  - reviewer
+  - git
+
+retry:
+  enabled: true
+  max_round: 3
