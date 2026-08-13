@@ -59,6 +59,17 @@ python git_lifecycle.py --commit --push
 `feat/fix/refactor/docs/test` 生成 commit，并输出 Task Report。`--push`
 只执行普通 `git push origin <branch>`，不会 force push。
 
+## Project Knowledge RAG（v1.5）
+
+索引项目文档、代码和 git commit 到本地向量库，按问题检索证据：
+
+```powershell
+python rag_query.py "为什么这个模块这样设计？"
+```
+
+输出检索到的文档/代码/commit 片段与相关度分数。向量库使用依赖-free 的
+hashing trick，无需外部模型或数据库。
+
 ## 文件结构
 
 ```text
@@ -91,7 +102,14 @@ codex-router/
 │   └── manager.py
 ├── report/
 │   └── generator.py
+├── vector_store/
+│   └── store.py
+├── knowledge/
+│   └── indexer.py
+├── rag/
+│   └── engine.py
 ├── git_lifecycle.py
+├── rag_query.py
 ├── launcher/
 │   ├── codex_auto.py
 │   ├── model_runner.py
@@ -106,7 +124,8 @@ codex-router/
 │   ├── test_launcher.py
 │   ├── test_execution_mode.py
 │   ├── test_memory.py
-│   └── test_git_lifecycle.py
+│   ├── test_git_lifecycle.py
+│   └── test_rag.py
 └── README.md
 ```
 
