@@ -105,9 +105,26 @@ role_routing:
     model: deepseek-chat
 
 fallback:
+  architect:
+    - openai
+    - deepseek
   coder:
     - deepseek
     - qwen
+    - glm
+  reviewer:
+    - glm
+    - openai
+  researcher:
+    - kimi
+    - qwen
+
+budget:
+  daily_limit:
+    openai: 100000000
+    deepseek: 5000000000
+  warning_threshold: 80
+  stop_threshold: 100
 
 launcher:
   codex_bin: codex-real
