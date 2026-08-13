@@ -486,3 +486,14 @@ codex --usage-cn --detail
 
 状态：`available / warning / limited / unavailable`；余额不足会中文提醒，
 失败时按 `fallback` 链切换，任务状态可保存并从当前阶段恢复。
+
+
+## 自动任务拆解 + Planner Agent（v2.5）
+
+`orchestrator/task_decomposer.py` 根据复杂度自动拆解任务：
+
+- 简单任务 → 单 Coder 步骤
+- 中等任务 → Planner + Coder
+- 复杂任务 → Planner + Coder + Tester + Reviewer
+
+Planner Agent 输出结构化 JSON 计划，包含任务依赖与优先级。
